@@ -83,6 +83,9 @@ class TiendaApplicationTests {
 	void test3() {
 		var listProds = prodRepo.findAll();
 		//TODO
+		listProds.forEach(p -> p.setNombre(p.getNombre().toUpperCase()));
+		listProds.forEach(p -> System.out.println("Nombre: " + p.getNombre() + ", Precio: " + p.getPrecio()));
+		System.out.println(listProds);
 	}
 	
 	/**
