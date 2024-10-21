@@ -56,8 +56,24 @@ class TiendaApplicationTests {
 	 */
 	@Test
 	void test2() {
-		var listProds = prodRepo.findAll();
-		//TODO
+		var listProdsPrecEur = prodRepo.findAll();
+		var listProdsPrecDolar = listProdsPrecEur.stream()
+				.map(p -> {
+
+					Producto pDolar = new Producto();
+					pDolar.setCodigo(p.getCodigo());
+					pDolar.setNombre(p.getNombre());
+					pDolar.setPrecio(p.getPrecio()*1.08);
+					pDolar.setFabricante(p.getFabricante());
+
+					return pDolar;
+				})
+				.toList();
+
+		System.out.println("Lista prods precioEur: ");
+		listProdsPrecDolar.forEach(p -> System.out.println(p));
+		System.out.println("Lista prods precioDolar: ");
+		listProdsPrecDolar.forEach(System.out::println);
 	}
 	
 	/**
@@ -237,6 +253,7 @@ class TiendaApplicationTests {
 	 * 22. Lista el nombre y el precio de todos los productos que tengan un precio mayor o igual a 180€. 
 	 * Ordene el resultado en primer lugar por el precio (en orden descendente) y en segundo lugar por el nombre (en orden ascendente).
 	 */
+	@Test
 	void test22() {
 		var listProds = prodRepo.findAll();
 		//TODO
