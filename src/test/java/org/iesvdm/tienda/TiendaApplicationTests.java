@@ -176,9 +176,11 @@ class TiendaApplicationTests {
 	@Test
 	void test10() {
 		var listProds = prodRepo.findAll();
-		var result = listProds.stream()
-				.min(comparing(Producto::getPrecio))
-				.stream().toList();
+		var result = listProds.stream();
+//				.min(comparing(Producto::getPrecio))
+//				.stream().toList();
+
+			// hacerlo de la forma de clase; Porque todavía no hemos visto el min;
 
 		result.forEach(x -> System.out.println(x.getNombre() + " - " + x.getPrecio()));
 	}
