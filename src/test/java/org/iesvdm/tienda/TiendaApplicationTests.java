@@ -4,9 +4,12 @@ import org.iesvdm.tienda.modelo.Fabricante;
 import org.iesvdm.tienda.modelo.Producto;
 import org.iesvdm.tienda.repository.FabricanteRepository;
 import org.iesvdm.tienda.repository.ProductoRepository;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+
+import static java.util.Comparator.*;
 import java.util.List;
 
 
@@ -103,7 +106,11 @@ class TiendaApplicationTests {
 	@Test
 	void test5() {
 		var listFabs = fabRepo.findAll();
-		//TODO		
+		var result = listFabs.stream()
+				.filter(f -> !f.getProductos().isEmpty())
+				.toList();
+
+		result.forEach(x -> System.out.println("Código: " + x.getCodigo()));
 	}
 	
 	/**
@@ -112,7 +119,11 @@ class TiendaApplicationTests {
 	@Test
 	void test6() {
 		var listFabs = fabRepo.findAll();
-		//TODO
+		var result = listFabs.stream()
+				.sorted(comparing(Fabricante::getNombre).reversed())
+				.toList();
+
+		result.forEach(x -> System.out.println(x.getNombre()));
 	}
 	
 	/**
@@ -121,7 +132,12 @@ class TiendaApplicationTests {
 	@Test
 	void test7() {
 		var listProds = prodRepo.findAll();
-		//TODO
+		var result = listProds.stream()
+				.sorted(comparing(Producto::getNombre).thenComparing(Producto::getPrecio, reverseOrder())) // se pone reverseOrder que invierte solo el precio, si ponemos reversed, invierte todo;
+				.toList();
+
+		result.forEach(x -> System.out.println(x.getNombre() + " - " + x.getPrecio() + " €"));
+
 	}
 	
 	/**
@@ -130,7 +146,11 @@ class TiendaApplicationTests {
 	@Test
 	void test8() {
 		var listFabs = fabRepo.findAll();
-		//TODO
+		var result = listFabs.stream()
+				.limit(5)
+				.toList();
+
+		result.forEach(System.out::println);
 	}
 	
 	/**
@@ -139,7 +159,15 @@ class TiendaApplicationTests {
 	@Test
 	void test9() {
 		var listFabs = fabRepo.findAll();
-		//TODO		
+		var result = listFabs.stream()
+				.skip(3)
+				.limit(2)
+				.toList();
+
+		result.forEach(System.out::println);
+
+		Assertions.assertTrue(result.size() == 2);
+		Assertions.assertEquals(result.get(0).getNombre(), "Samsung");
 	}
 	
 	/**
@@ -148,7 +176,11 @@ class TiendaApplicationTests {
 	@Test
 	void test10() {
 		var listProds = prodRepo.findAll();
-		//TODO
+		var result = listProds.stream()
+				.min(comparing(Producto::getPrecio))
+				.stream().toList();
+
+		result.forEach(x -> System.out.println(x.getNombre() + " - " + x.getPrecio()));
 	}
 	
 	/**
