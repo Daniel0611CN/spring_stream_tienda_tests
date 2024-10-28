@@ -10,7 +10,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import static java.util.Comparator.*;
+
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -269,20 +272,22 @@ class TiendaApplicationTests {
 	 */
 	@Test
 	void test17() {
-//		var listProds = prodRepo.findAll();
-//
-//		// Set se refiere a una lista, no un setter;
-//		TreeSet<Integer> set = new TreeSet<>();
-//
-//        for (Producto listProd : listProds) {
-//            set.add(listProd.getFabricante().getCodigo());
-//        }
-//
-//		var result = listProds.stream()
-//				.filter(p -> set.stream().filter(s -> s==1 || s==2|| s==3).isParallel())
-//				.toList();
-//
-//		result.forEach((Consumer<? super Producto>) listProds);
+		var listProds = prodRepo.findAll();
+
+		// Set se refiere a una lista, no un setter;
+		Set<Integer> setProductos = new HashSet<>();
+
+        for (Producto listProd : listProds) {
+            if (listProd.getFabricante().getCodigo() == 1 || listProd.getFabricante().getCodigo() == 3 || listProd.getFabricante().getCodigo() == 5) {
+                setProductos.add(listProd.getFabricante().getCodigo());
+            }
+        }
+
+		var result = listProds.stream()
+				.filter(p -> setProductos.contains(p.getFabricante().getCodigo()))
+				.toList();
+
+		result.forEach(System.out::println);
 	}
 	
 	/**

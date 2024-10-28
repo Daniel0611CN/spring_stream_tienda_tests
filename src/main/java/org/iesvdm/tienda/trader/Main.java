@@ -2,10 +2,8 @@ package org.iesvdm.tienda.trader;
 
 import static java.util.stream.Collectors.*;
 import static java.util.Comparator.*;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+
+import java.util.*;
 
 public class Main {
 
@@ -63,23 +61,28 @@ public class Main {
         // 5 ¿Hay traders con sede en Milán? Sí o no
         boolean milanBased = transactions.stream()
                 .anyMatch(transaction
-                        -> transaction.getTrader().getCiudad().equals("Milan"));
+                        -> transaction.getTrader().getCiudad() != null ? transaction.getTrader().getCiudad().equals("Milan") : false);
+
+        Set<String> setCiudades = new HashSet<>();
+        setCiudades.add("Cambridge");
+        setCiudades.add("Berlín");
+        setCiudades.add("Madrid");
 
         // 6 Imprime los valores de todas las transacciones de los traders que viven en
         // Cambridge.
         transactions.stream()
-                .filter(t -> "Cambridge".equals(t.getTrader().getCiudad()))
+                .filter(t -> setCiudades.contains(t.getTrader().getCiudad()))
                 .map(Transaction::getValor)
                 .forEach(System.out::println);
 
         // 7 ¿Cuál es el valor más alto de todas las transacciones?
         Optional<Integer> highestValue = transactions.stream()
                 .map(Transaction::getValor)
-                .reduce(Integer::max);
+                .reduce((a, b) -> Integer.max(a, b));
 
         // 8 Encuentra la transacción con el valor más pequeño.
         Optional<Transaction> smallestTransaction =  transactions.stream()
-                .reduce((t1, t2) -> 	 t1.getValor() < t2.getValor() ? t1 : t2);
+                .reduce((t1, t2) -> t1.getValor() < t2.getValor() ? t1 : t2);
 
         smallestTransaction = transactions.stream()
                 .min(comparing(Transaction::getValor));
