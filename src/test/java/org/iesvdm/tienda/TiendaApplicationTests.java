@@ -11,6 +11,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import static java.util.Comparator.*;
 import java.util.List;
+import java.util.TreeSet;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 
 @SpringBootTest
@@ -201,7 +204,12 @@ class TiendaApplicationTests {
 	@Test
 	void test12() {
 		var listProds = prodRepo.findAll();
-		//TODO
+		var result = listProds.stream()
+				.filter(f -> f.getFabricante().getCodigo() == 2)
+				.toList();
+
+		result.forEach(x -> System.out.println("Nombre Producto: " + x.getNombre() + " - " + "Código Fabricante: " + x.getFabricante().getCodigo()));
+
 	}
 	
 	/**
@@ -210,7 +218,11 @@ class TiendaApplicationTests {
 	@Test
 	void test13() {
 		var listProds = prodRepo.findAll();
-		//TODO
+		var result = listProds.stream()
+				.filter(f -> f.getPrecio() <= 120)
+				.toList();
+
+		result.forEach(x -> System.out.println("Nombre Producto: " + x.getNombre() + " - " + "Precio: " + x.getPrecio()));
 	}
 	
 	/**
@@ -219,7 +231,11 @@ class TiendaApplicationTests {
 	@Test
 	void test14() {
 		var listProds = prodRepo.findAll();
-		//TODO
+		var result = listProds.stream()
+				.filter(p -> p.getPrecio() >= 400)
+				.toList();
+
+		result.forEach(System.out::println);
 	}
 	
 	/**
@@ -228,7 +244,11 @@ class TiendaApplicationTests {
 	@Test
 	void test15() {
 		var listProds = prodRepo.findAll();
-		//TODO
+		var result = listProds.stream()
+				.filter(p -> p.getPrecio() >= 80 && p.getPrecio() <= 300)
+				.toList();
+
+		result.forEach(System.out::println);
 	}
 	
 	/**
@@ -237,7 +257,11 @@ class TiendaApplicationTests {
 	@Test
 	void test16() {
 		var listProds = prodRepo.findAll();
-		//TODO
+		var result = listProds.stream()
+				.filter(p -> p.getPrecio() > 200 && p.getFabricante().getCodigo() == 6)
+				.toList();
+
+		result.forEach(System.out::println);
 	}
 	
 	/**
@@ -245,8 +269,20 @@ class TiendaApplicationTests {
 	 */
 	@Test
 	void test17() {
-		var listProds = prodRepo.findAll();
-		//TODO
+//		var listProds = prodRepo.findAll();
+//
+//		// Set se refiere a una lista, no un setter;
+//		TreeSet<Integer> set = new TreeSet<>();
+//
+//        for (Producto listProd : listProds) {
+//            set.add(listProd.getFabricante().getCodigo());
+//        }
+//
+//		var result = listProds.stream()
+//				.filter(p -> set.stream().filter(s -> s==1 || s==2|| s==3).isParallel())
+//				.toList();
+//
+//		result.forEach((Consumer<? super Producto>) listProds);
 	}
 	
 	/**
