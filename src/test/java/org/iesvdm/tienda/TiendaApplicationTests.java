@@ -669,7 +669,10 @@ Fabricante: Xiaomi
 	@Test
 	void test33() {
 		var listProds = prodRepo.findAll();
-		// Preguntar al profe;
+		var result = listProds.stream()
+				.mapToDouble(Producto::getPrecio).min();
+
+		System.out.println(result);
 	}
 	
 	/**
@@ -803,7 +806,13 @@ Hewlett-Packard              2
 	@Test
 	void test39() {
 		var listFabs = fabRepo.findAll();
-		//TODO
+		var result = listFabs.stream()
+				.filter(f -> f.getProductos().stream().toList().isEmpty())
+				.toList();
+
+
+
+		result.forEach(System.out::println);
 	}
 	
 	/**
@@ -813,7 +822,16 @@ Hewlett-Packard              2
 	@Test
 	void test40() {
 		var listFabs = fabRepo.findAll();
-//		var result = listFabs.stream();
+		var result = listFabs.stream()
+				.filter(f -> f.getProductos().stream().mapToDouble(Producto::getPrecio).average().orElse(0) > 200)
+				.map(f -> f.getProductos().stream().map(p -> p.getCodigo() + " -> " + p.getPrecio()))
+				.toList();
+
+//		for (int i = 0; i < result.size(); i++) {
+//			var max = result;
+//		}
+
+		result.forEach(System.out::println);
 	}
 	
 	/**
