@@ -726,12 +726,8 @@ Fabricante: Xiaomi
 				.filter(p -> p.getFabricante().getNombre().equals("Crucial"))
 				.map(p -> p.getPrecio())
 				.reduce(aux, (ac, precio) -> {
-					ac[0] = 1.0;
-					ac[1] = 2.0;
-					ac[2] = 3.0;
-					ac[3] = 4.0;
-					aux[0] = Math.max(ac[0], precio);
-					aux[1] = Math.min(ac[1], precio);
+					aux[0] = Math.max(aux[0], precio);
+					aux[1] = Math.min(aux[1], precio);
 					aux[2] += ac[2];
 					aux[3] += ac[3];
 					return aux;
@@ -789,7 +785,14 @@ Hewlett-Packard              2
 	@Test
 	void test38() {
 		var listFabs = fabRepo.findAll();
-		//TODO
+		var result = listFabs.stream()
+				.map(p -> String.format("%15s", p.getNombre()) + String.format("%15s", String.valueOf(p.getProductos().stream().count())))
+				.toList();
+
+		System.out.println("     Fabricante     #Productos\n-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*");
+		result.forEach(System.out::println);
+
+		Assertions.assertTrue(result.get(0).contains("2"));
 	}
 	
 	/**
@@ -810,7 +813,7 @@ Hewlett-Packard              2
 	@Test
 	void test40() {
 		var listFabs = fabRepo.findAll();
-		//TODO
+//		var result = listFabs.stream();
 	}
 	
 	/**
@@ -819,7 +822,13 @@ Hewlett-Packard              2
 	@Test
 	void test41() {
 		var listFabs = fabRepo.findAll();
-		//TODO
+		var result = listFabs.stream()
+				.filter(f -> f.getProductos().stream().count() >= 2)
+				.toList();
+
+		result.forEach(System.out::println);
+
+		Assertions.assertTrue(result.size() <= listFabs.size());
 	}
 	
 	/**
@@ -829,7 +838,12 @@ Hewlett-Packard              2
 	@Test
 	void test42() {
 		var listFabs = fabRepo.findAll();
-		//TODO
+		var result = listFabs.stream()
+				.sorted(comparing(f -> f.getProductos().stream().count(), reverseOrder()))
+				.map(f -> f.getNombre() + ", " + f.getProductos().stream().filter(p -> p.getPrecio() >= 220).count())
+				.toList();
+
+		result.forEach(System.out::println);
 	}
 	
 	/**
@@ -838,7 +852,12 @@ Hewlett-Packard              2
 	@Test
 	void test43() {
 		var listFabs = fabRepo.findAll();
-		//TODO
+		var result = listFabs.stream()
+				.filter(f -> f.getProductos().stream().mapToDouble(p -> p.getPrecio()).sum() > 1000)
+				.map(f -> f.getNombre())
+				.toList();
+
+		result.forEach(System.out::println);
 	}
 	
 	/**
@@ -848,9 +867,18 @@ Hewlett-Packard              2
 	@Test
 	void test44() {
 		var listFabs = fabRepo.findAll();
-		//TODO	
+		var result = listFabs.stream()
+				.sorted(comparing(f -> f.getProductos().stream().mapToDouble(p -> p.getPrecio()).sum()))
+				.filter(f -> f.getProductos().stream().mapToDouble(p -> p.getPrecio()).sum() > 1000)
+				.map(f -> f.getNombre())
+				.toList();
+
+		result.forEach(System.out::println);
+
+		Assertions.assertTrue(result.get(0).equals("Lenovo"));
+		Assertions.assertEquals(1, result.size());
 	}
-	
+
 	/**
 	 * 45. Devuelve un listado con el nombre del producto más caro que tiene cada fabricante. 
 	 * El resultado debe tener tres columnas: nombre del producto, precio y nombre del fabricante. 
@@ -859,7 +887,12 @@ Hewlett-Packard              2
 	@Test
 	void test45() {
 		var listFabs = fabRepo.findAll();
-		//TODO
+		var result = listFabs.stream()
+				.sorted(comparing(Fabricante::getNombre))
+				.map(f -> f.getProductos().stream().max(comparing(Producto::getPrecio)).map(p -> p.getNombre() + ", " + p.getPrecio()) + ", " + f.getNombre())
+				.toList();
+
+		result.forEach(System.out::println);
 	}
 	
 	/**
@@ -869,7 +902,13 @@ Hewlett-Packard              2
 	@Test
 	void test46() {
 		var listFabs = fabRepo.findAll();
-		//TODO
+
+		var result = listFabs.stream()
+				.sorted(comparing(Fabricante::getNombre).thenComparing(f -> f.getProductos().stream().mapToDouble(p -> p.getPrecio()).sum(), reverseOrder()))
+				.map(f -> f.getProductos().stream().filter(p -> p.getPrecio() >= p.getFabricante().getProductos().stream().mapToDouble(o -> o.getPrecio()).average().getAsDouble()).toList())
+				.toList();
+
+		result.forEach(System.out::println);
 	}
 
 }
