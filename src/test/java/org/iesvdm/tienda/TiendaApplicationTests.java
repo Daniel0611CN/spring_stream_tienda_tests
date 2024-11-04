@@ -12,10 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import static java.util.Comparator.*;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
 
@@ -164,7 +161,7 @@ class TiendaApplicationTests {
 	void test7() {
 		var listProds = prodRepo.findAll();
 		var result = listProds.stream()
-				.sorted(comparing(org.iesvdm.tienda.modelo.Producto::getNombre).thenComparing(org.iesvdm.tienda.modelo.Producto::getPrecio, reverseOrder())) // se pone reverseOrder que invierte solo el precio, si ponemos reversed, invierte todo;
+				.sorted(comparing(Producto::getNombre).thenComparing(Producto::getPrecio, reverseOrder())) // se pone reverseOrder que invierte solo el precio, si ponemos reversed, invierte todo;
 				.toList();
 
 		result.forEach(x -> System.out.println(x.getNombre() + " - " + x.getPrecio() + " €"));
@@ -214,7 +211,7 @@ class TiendaApplicationTests {
 	void test10() {
 		var listProds = prodRepo.findAll();
 		var result = listProds.stream()
-				.min(comparing(org.iesvdm.tienda.modelo.Producto::getPrecio))
+				.min(comparing(Producto::getPrecio))
 				.map(p -> p.getNombre() + " -> " + p.getPrecio())
 				.stream().toList();
 
@@ -231,7 +228,7 @@ class TiendaApplicationTests {
 	void test11() {
 		var listProds = prodRepo.findAll();
 		var result = listProds.stream()
-				.max(comparing(org.iesvdm.tienda.modelo.Producto::getPrecio))
+				.max(comparing(Producto::getPrecio))
 				.map(p -> p.getNombre() + " -> " + p.getPrecio())
 				.stream().toList();
 
@@ -250,7 +247,7 @@ class TiendaApplicationTests {
 		var listProds = prodRepo.findAll();
 		var result = listProds.stream()
 				.filter(f -> f.getFabricante().getCodigo() == 2)
-				.map(org.iesvdm.tienda.modelo.Producto::getNombre)
+				.map(Producto::getNombre)
 				.toList();
 
 		result.forEach(System.out::println);
@@ -267,7 +264,7 @@ class TiendaApplicationTests {
 		var listProds = prodRepo.findAll();
 		var result = listProds.stream()
 				.filter(p -> p.getPrecio() <= 120)
-				.map(org.iesvdm.tienda.modelo.Producto::getNombre)
+				.map(Producto::getNombre)
 				.toList();
 
 		result.forEach(System.out::println);
@@ -438,7 +435,7 @@ class TiendaApplicationTests {
 		var listProds = prodRepo.findAll();
 		var result = listProds.stream()
 				.filter(p -> p.getPrecio() >= 180)
-				.sorted(comparing(org.iesvdm.tienda.modelo.Producto::getPrecio, reverseOrder()).thenComparing(org.iesvdm.tienda.modelo.Producto::getNombre))
+				.sorted(comparing(Producto::getPrecio, reverseOrder()).thenComparing(Producto::getNombre))
 				.toList();
 
 		result.forEach(x -> System.out.println(x.getNombre() + " -> " + x.getPrecio() + " €"));
@@ -471,7 +468,7 @@ class TiendaApplicationTests {
 	void test24() {
 		var listProds = prodRepo.findAll();
 		var result = listProds.stream()
-				.max(comparing(p -> p.getPrecio()))
+				.max(comparing(Producto::getPrecio))
 				.map(p -> p.getNombre() + " - " + p.getPrecio() + " - " + p.getFabricante().getNombre())
 				.stream().toList();
 
@@ -527,7 +524,7 @@ Monitor 27 LED Full HD |199.25190000000003|Asus
 		var listProds = prodRepo.findAll();
 		var result = listProds.stream()
 				.filter(p -> p.getPrecio() >= 180)
-				.sorted(comparing(org.iesvdm.tienda.modelo.Producto::getPrecio, reverseOrder()).thenComparing(org.iesvdm.tienda.modelo.Producto::getNombre))
+				.sorted(comparing(Producto::getPrecio, reverseOrder()).thenComparing(Producto::getNombre))
 				.map(p -> p.getNombre() + "|" + p.getPrecio() + "|" + p.getFabricante().getNombre())
 				.toList();
 
@@ -660,7 +657,9 @@ Fabricante: Xiaomi
 				.mapToDouble(Producto::getPrecio)
 				.average();
 
-		System.out.println(result);
+		System.out.println(result.orElse(0.0));
+
+		Assertions.assertEquals(OptionalDouble.of(271.7236363636364), result);
 	}
 	
 	/**
@@ -672,7 +671,9 @@ Fabricante: Xiaomi
 		var result = listProds.stream()
 				.mapToDouble(Producto::getPrecio).min();
 
-		System.out.println(result);
+		System.out.println(result.orElse(0.0));
+
+		Assertions.assertEquals(OptionalDouble.of(59.99), result);
 	}
 	
 	/**
@@ -684,7 +685,10 @@ Fabricante: Xiaomi
 		var result = listProds.stream()
 				.mapToDouble(Producto::getPrecio)
 				.sum();
+
 		System.out.println(result);
+
+		Assertions.assertEquals(2988.96, result);
 	}
 	
 	/**
@@ -698,6 +702,8 @@ Fabricante: Xiaomi
 				.count();
 
 		System.out.println(result);
+
+		Assertions.assertEquals(2, result);
 	}
 	
 	/**
@@ -712,6 +718,8 @@ Fabricante: Xiaomi
 				.average();
 
 		System.out.println(result);
+
+		Assertions.assertEquals(OptionalDouble.of(223.995), result);
 	}
 	
 	
@@ -722,47 +730,15 @@ Fabricante: Xiaomi
 	@Test
 	void test37() {
 		var listProds = prodRepo.findAll();
+		var result = listProds.stream()
+				.filter(p -> p.getFabricante().getNombre().equalsIgnoreCase("Crucial"))
+				.map(p -> new Double[]{p.getPrecio(), p.getPrecio(), p.getPrecio(), 1.0})
+				.reduce((doubles, doubles2) -> new Double[] {
+						Math.min(doubles[0], doubles2[0]), Math.max(doubles[1], doubles2[1]), doubles[2]+doubles2[2], doubles[3]+doubles2[3]})
+				.orElse(new Double[]{});
 
-		Double[] aux = new Double[4];
-
-		var result = Arrays.stream(listProds.stream()
-				.filter(p -> p.getFabricante().getNombre().equals("Crucial"))
-				.map(p -> p.getPrecio())
-				.reduce(aux, (ac, precio) -> {
-					aux[0] = Math.max(aux[0], precio);
-					aux[1] = Math.min(aux[1], precio);
-					aux[2] += ac[2];
-					aux[3] += ac[3];
-					return aux;
-				}, (a1, a2) -> a1)).toList();
-
-		System.out.println(result);
-//		Double[] total = result.reduce()
-
-//		var maxCrucial = listProds.stream()
-//				.filter(p -> p.getFabricante().getNombre().equals("Crucial"))
-//				.max(comparing(Producto::getPrecio))
-//				.map(Producto::getPrecio);
-//
-//		var minCrucial = listProds.stream()
-//				.filter(p -> p.getFabricante().getNombre().equals("Crucial"))
-//				.min(comparing(Producto::getPrecio))
-//				.map(Producto::getPrecio);
-//
-//		var mediaCrucial = listProds.stream()
-//				.filter(p -> p.getFabricante().getNombre().equals("Crucial"))
-//				.mapToDouble(Producto::getPrecio)
-//				.average();
-//
-//		var totalProds = listProds.stream()
-//				.filter(p -> p.getFabricante().getNombre().equals("Crucial"))
-//				.count();
-//
-//		System.out.println("Precio máximo: " + maxCrucial);
-//		System.out.println("Precio mínimo: " + minCrucial);
-//		System.out.println("Precio medio: " + mediaCrucial);
-//		System.out.println("Total productos: " + totalProds);
-
+		Double media = result[3]>0 ? result[2]/result[3]: 0.0; // Si el result[3] > 0 pues entonces result[2]/result[3], sino media = 0.0;
+		System.out.println("El valor mínimo: " + result[0] + "\nEl valor máximo: " + result[1] + "\nEl valor medio: " + result[2] + "\nNúmero total de valores: " + result[3]);
 	}
 	
 	/**
@@ -806,13 +782,21 @@ Hewlett-Packard              2
 	@Test
 	void test39() {
 		var listFabs = fabRepo.findAll();
-		var result = listFabs.stream()
-				.filter(f -> f.getProductos().stream().toList().isEmpty())
-				.toList();
+		var result = listFabs.stream();
+//				.filter(p -> p.getFabricante().getNombre().equalsIgnoreCase("Crucial"))
+//				.map(f -> new Double[]{, 1.0})
+//				.reduce((doubles, doubles2) -> new Double[] {
+//						Math.min(doubles[0], doubles2[0]), Math.max(doubles[1], doubles2[1]), doubles[2]+doubles2[2], doubles[3]+doubles2[3]})
+//				.orElse(new Double[]{});
+
+//		Double media = result[3]>0 ? result[2]/result[3]: 0.0; // Si el result[3] > 0 pues entonces result[2]/result[3], sino media = 0.0;
+//		System.out.println("El valor mínimo: " + result[0] + "\nEl valor máximo: " + result[1] + "\nEl valor medio: " + result[2] + "\nNúmero total de valores: " + result[3]);
+
+//				.map(f -> f.getProductos().stream().map(p -> p.getPrecio()).;
+
+		System.out.println(result);
 
 
-
-		result.forEach(System.out::println);
 	}
 	
 	/**
@@ -876,6 +860,8 @@ Hewlett-Packard              2
 				.toList();
 
 		result.forEach(System.out::println);
+
+		Assertions.assertEquals("Lenovo", result.get(0));
 	}
 	
 	/**
@@ -911,6 +897,8 @@ Hewlett-Packard              2
 				.toList();
 
 		result.forEach(System.out::println);
+
+		Assertions.assertTrue(result.get(0).contains("Asus"));
 	}
 	
 	/**
@@ -927,6 +915,8 @@ Hewlett-Packard              2
 				.toList();
 
 		result.forEach(System.out::println);
+
+		Assertions.assertTrue(result.get(4).isEmpty());
 	}
 
 }
