@@ -11,6 +11,7 @@ import org.springframework.beans.factory.config.PropertyResourceConfigurer;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import static java.util.Comparator.*;
+import static java.util.stream.Collectors.*;
 
 import java.util.*;
 import java.util.function.BinaryOperator;
@@ -55,16 +56,12 @@ class TiendaApplicationTests {
 	@Test
 	void test1() {
 		var listProds = prodRepo.findAll();
-//		record Producto(String nombre, Double precio) {}
 		var result = listProds.stream()
-//				.map(p -> new Producto(p.getNombre(), p.getPrecio()))
 				.map(p -> p.getNombre() + ", " + p.getPrecio())
 				.toList();
 
 		result.forEach(System.out::println);
 
-//		Assertions.assertEquals("Disco duro SATA3 1TB", result.getFirst().nombre);
-//		Assertions.assertEquals(86.99, result.getFirst().precio);
 		Assertions.assertEquals("Disco duro SATA3 1TB, 86.99", result.getFirst());
 	}
 	
@@ -86,7 +83,6 @@ class TiendaApplicationTests {
 				}).toList();
 
 		result.forEach(System.out::println);
-
 		Assertions.assertTrue(result.getFirst().getPrecio() > listProdsPrecEur.getFirst().getPrecio());
 	}
 	
@@ -782,20 +778,10 @@ Hewlett-Packard              2
 	@Test
 	void test39() {
 		var listFabs = fabRepo.findAll();
-		var result = listFabs.stream();
-//				.filter(p -> p.getFabricante().getNombre().equalsIgnoreCase("Crucial"))
-//				.map(f -> new Double[]{, 1.0})
-//				.reduce((doubles, doubles2) -> new Double[] {
-//						Math.min(doubles[0], doubles2[0]), Math.max(doubles[1], doubles2[1]), doubles[2]+doubles2[2], doubles[3]+doubles2[3]})
-//				.orElse(new Double[]{});
-
-//		Double media = result[3]>0 ? result[2]/result[3]: 0.0; // Si el result[3] > 0 pues entonces result[2]/result[3], sino media = 0.0;
-//		System.out.println("El valor mínimo: " + result[0] + "\nEl valor máximo: " + result[1] + "\nEl valor medio: " + result[2] + "\nNúmero total de valores: " + result[3]);
-
-//				.map(f -> f.getProductos().stream().map(p -> p.getPrecio()).;
-
-		System.out.println(result);
-
+		var result = listFabs.stream()
+				.flatMap(f -> f.getProductos().stream())
+				.mapToDouble(p -> p.getPrecio())
+				.min();
 
 	}
 	
@@ -841,11 +827,16 @@ Hewlett-Packard              2
 	void test42() {
 		var listFabs = fabRepo.findAll();
 		var result = listFabs.stream()
-				.sorted(comparing(f -> f.getProductos().stream().count(), reverseOrder()))
+				.sorted(comparing(f -> f.getProductos().stream().filter(p -> p.getPrecio() >= 220).count(), reverseOrder()))
 				.map(f -> f.getNombre() + ", " + f.getProductos().stream().filter(p -> p.getPrecio() >= 220).count())
 				.toList();
 
 		result.forEach(System.out::println);
+
+		Map<String, Long> mapFabContProd = listFabs.stream()
+						.flatMap(f -> f.getProductos().stream())
+						.filter(p -> p.getPrecio() >= 220)
+						.collect(groupingBy((Producto p) -> p.getFabricante().getNombre(), counting()));
 	}
 	
 	/**
