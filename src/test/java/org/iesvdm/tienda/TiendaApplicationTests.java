@@ -735,6 +735,8 @@ Fabricante: Xiaomi
 
 		Double media = result[3]>0 ? result[2]/result[3]: 0.0; // Si el result[3] > 0 pues entonces result[2]/result[3], sino media = 0.0;
 		System.out.println("El valor mínimo: " + result[0] + "\nEl valor máximo: " + result[1] + "\nEl valor medio: " + result[2] + "\nNúmero total de valores: " + result[3]);
+
+		Assertions.assertEquals(4, result.length);
 	}
 	
 	/**
@@ -779,10 +781,22 @@ Hewlett-Packard              2
 	void test39() {
 		var listFabs = fabRepo.findAll();
 		var result = listFabs.stream()
-				.flatMap(f -> f.getProductos().stream())
-				.mapToDouble(p -> p.getPrecio())
-				.min();
+				.collect(Collectors.toMap(
+						f -> f.getNombre(),
+						f -> f.getProductos().stream()
+								.map(p -> new Double[]{p.getPrecio(), p.getPrecio(), p.getPrecio(), 1.0})
+								.reduce((doubles, doubles2) -> new Double[] {
+										Math.max(doubles[0], doubles2[0]), Math.min(doubles[1], doubles2[1]), doubles[2] + doubles2[2], doubles[3] + doubles2[3]
+								})
+								.orElse(new Double[]{0.0, 0.0, 0.0, 0.0})
+				));
 
+		result.forEach((fabricante, datos) -> {
+			double media = datos[3] > 0 ? datos[2] / datos[3] : 0.0;
+			System.out.println("Fabricante: " + fabricante + "\n Máximo: " + datos[0] + "\n Mínimo: " + datos[1] + "\n Media: " + media);
+		});
+
+		Assertions.assertTrue(result.size() == listFabs.size());
 	}
 	
 	/**
@@ -793,15 +807,21 @@ Hewlett-Packard              2
 	void test40() {
 		var listFabs = fabRepo.findAll();
 		var result = listFabs.stream()
-				.filter(f -> f.getProductos().stream().mapToDouble(Producto::getPrecio).average().orElse(0) > 200)
-				.map(f -> f.getProductos().stream().map(p -> p.getCodigo() + " -> " + p.getPrecio()))
-				.toList();
+				.filter(f -> f.getProductos().stream()
+						.mapToDouble(p -> p.getPrecio()).average().orElse(0.0) > 200)
+				.collect(Collectors.toMap(f -> f.getCodigo(),
+						f -> {
+							double max = f.getProductos().stream().mapToDouble(p -> p.getPrecio()).max().orElse(0.0);
+							double min = f.getProductos().stream().mapToDouble(p -> p.getPrecio()).min().orElse(0.0);
+							double sum = f.getProductos().stream().mapToDouble(p -> p.getPrecio()).sum();
+							double media = f.getProductos().size() > 0 ? sum / f.getProductos().size() : 0.0;
+							return new Double[]{max, min, media, (double) f.getProductos().size()};}
+				));
 
-//		for (int i = 0; i < result.size(); i++) {
-//			var max = result;
-//		}
+		result.forEach((codigo, datos) -> {System.out.println("Código de Fabricante: " + codigo + "\n Máximo: " + datos[0] + "\n Mínimo: " + datos[1]
+				+ "\n Media: " + datos[2] + "\n Total Productos: " + datos[3]);});
 
-		result.forEach(System.out::println);
+		Assertions.assertTrue(result.size() < listFabs.size());
 	}
 	
 	/**
@@ -833,10 +853,12 @@ Hewlett-Packard              2
 
 		result.forEach(System.out::println);
 
-		Map<String, Long> mapFabContProd = listFabs.stream()
-						.flatMap(f -> f.getProductos().stream())
-						.filter(p -> p.getPrecio() >= 220)
-						.collect(groupingBy((Producto p) -> p.getFabricante().getNombre(), counting()));
+		Assertions.assertTrue(result.getFirst().contains("Lenovo"));
+
+//		Map<String, Long> mapFabContProd = listFabs.stream()
+//						.flatMap(f -> f.getProductos().stream())
+//						.filter(p -> p.getPrecio() >= 220)
+//						.collect(groupingBy((Producto p) -> p.getFabricante().getNombre(), counting()));
 	}
 	
 	/**
